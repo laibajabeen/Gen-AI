@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.graph_objs as go
 import math
 
 # Title and Description
@@ -59,7 +59,7 @@ if st.button("Calculate"):
 st.header("Graph Plotting")
 
 # Input mathematical function for plotting
-function_input = st.text_input("Enter a function to plot (use 'x' as the variable, e.g., sin(x), cos(x), x**2):", value="sin(x)")
+function_input = st.text_input("Enter a function to plot (use 'x' as the variable, e.g., np.sin(x), np.cos(x), x**2):", value="np.sin(x)")
 
 # Input x-range
 x_min = st.number_input("Enter minimum x-value for plotting:", value=-10.0)
@@ -70,17 +70,20 @@ if st.button("Plot"):
     try:
         # Generate x values
         x = np.linspace(x_min, x_max, 400)
+        
         # Use eval to interpret user input as a Python expression
-        y = eval(function_input)
+        # np is pre-defined, so the user must input NumPy functions like np.sin(x)
+        y = eval(function_input, {"np": np, "x": x})
+        
+        # Plotting with Plotly
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name=f'Graph of {function_input}'))
 
-        # Plotting with Matplotlib
-        fig, ax = plt.subplots()
-        ax.plot(x, y)
-        ax.set_title(f"Graph of {function_input}")
-        ax.set_xlabel("x")
-        ax.set_ylabel("f(x)")
-        st.pyplot(fig)
+        # Set graph labels and title
+        fig.update_layout(title=f'Graph of {function_input}', xaxis_title='x', yaxis_title='f(x)')
+        st.plotly_chart(fig)
 
     except Exception as e:
         st.error(f"Error in plotting function: {e}")
+
 
